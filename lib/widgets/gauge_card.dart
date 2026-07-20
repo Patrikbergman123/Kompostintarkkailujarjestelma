@@ -5,6 +5,7 @@ class GaugeCard extends StatelessWidget {
   final double value;
   final String unit;
   final IconData icon;
+  final Color gaugeColor;
 
   const GaugeCard({
     super.key,
@@ -12,12 +13,16 @@ class GaugeCard extends StatelessWidget {
     required this.value,
     required this.unit,
     required this.icon,
+    required this.gaugeColor,
   });
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 4,
+      elevation: 6,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+      ),
       child: SizedBox(
         width: 250,
         height: 300,
@@ -25,7 +30,7 @@ class GaugeCard extends StatelessWidget {
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
-              Icon(icon, size: 40),
+              Icon(icon, size: 40, color: gaugeColor),
               const SizedBox(height: 10),
               Text(
                 title,
@@ -35,9 +40,16 @@ class GaugeCard extends StatelessWidget {
               const Spacer(),
 
               // Tähän tulee myöhemmin varsinainen mittari
-              const Placeholder(
-                fallbackHeight: 120,
-                fallbackWidth: 120,
+              Container(
+                height: 120,
+                width: 120,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(100),
+                  border: Border.all(
+                    color: gaugeColor,
+                    width: 5,
+                  ),
+                ),
               ),
 
 

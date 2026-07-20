@@ -1,4 +1,9 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
 import 'widgets/gauge_card.dart';
 
 void main() {
@@ -11,21 +16,103 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Kompostintarkkailu',
       debugShowCheckedModeBanner: false,
+      title: 'Kompostintarkkailujärjestelmä',
       theme: ThemeData(
+        useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.green,
         ),
-        useMaterial3: true,
       ),
       home: const MyHomePage(),
     );
   }
 }
 
-class MyHomePage extends StatelessWidget {
+class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
+
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  /// Vaihda tähän Arduinon IP-osoite
+  static const String arduinoIp = "192.168.1.50";
+
+  double temperature = 0;
+  double humidity = 0;
+  double compost = 0;
+
+  bool connected = false;
+
+  Timer? timer;
+
+  @override
+  void initState() {
+    super.initState();
+
+    loadSensorData();
+
+    timer = Timer.periodic(
+      const Duration(seconds: 5),
+      (_) => loadSensorData(),
+    );
+  }
+
+  @override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> loadSensorData() async {
+    try {
+      final response = await http.get(
+        Uri.parse("http://$arduinoIp/data"),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        setState(() {
+          temperature = (data["temperature"] as num).toDouble();
+          humidity = (data["humidity"] as num).toDouble();
+          compost = (data["compost"] as num).toDouble();
+
+          connected = true;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        connected = false;
+      });
+    }
+  }
+
+  Color getCompostColor() {
+    if (temperature < 30) {
+      return Colors.red;
+    }
+
+    if (humidity < 50) {
+      return Colors.orange;
+    }
+
+    return Colors.green;
+  }
+
+  String getCompostStatus() {
+    if (temperature < 30) {
+      return "Komposti liian kylmä";
+    }
+
+    if (humidity < 50) {
+      return "Lisää kosteutta";
+    }
+
+    return "Kompostoituminen käynnissä";
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,34 +121,73 @@ class MyHomePage extends StatelessWidget {
         title: const Text("Kompostintarkkailujärjestelmä"),
         centerTitle: true,
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Wrap(
-            spacing: 20,
-            runSpacing: 20,
-            alignment: WrapAlignment.center,
-            children: const [
-              GaugeCard(
-                title: "Lämpötila",
-                value: 45.3,
-                unit: "°C",
-                icon: Icons.thermostat,
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            Text(
+              connected
+                  ? "Yhteys Arduinoon muodostettu"
+                  : "Ei yhteyttä Arduinoon",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: connected ? Colors.green : Colors.red,
               ),
-              GaugeCard(
-                title: "Kosteus",
-                value: 68,
-                unit: "%",
-                icon: Icons.water_drop,
+            ),
+
+            const SizedBox(height: 25),
+
+            Expanded(
+              child: Wrap(
+                spacing: 20,
+                runSpacing: 20,
+                alignment: WrapAlignment.center,
+                children: [
+                  GaugeCard(
+                    title: "Lämpötila",
+                    value: temperature,
+                    unit: "°C",
+                    icon: Icons.thermostat,
+                    gaugeColor: Colors.red,
+                  ),
+                  GaugeCard(
+                    title: "Kosteus",
+                    value: humidity,
+                    unit: "%",
+                    icon: Icons.water_drop,
+                    gaugeColor: Colors.blue,
+                  ),
+                  GaugeCard(
+                    title: "Kompostoituminen",
+                    value: compost,
+                    unit: "%",
+                    icon: Icons.eco,
+                    gaugeColor: getCompostColor(),
+                  ),
+                ],
               ),
-              GaugeCard(
-                title: "Kompostoituminen",
-                value: 82,
-                unit: "%",
-                icon: Icons.eco,
+            ),
+
+            const SizedBox(height: 20),
+
+            Text(
+              getCompostStatus(),
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: getCompostColor(),
               ),
-            ],
-          ),
+            ),
+
+            const SizedBox(height: 20),
+
+            ElevatedButton.icon(
+              onPressed: loadSensorData,
+              icon: const Icon(Icons.refresh),
+              label: const Text("Päivitä mittaukset"),
+            ),
+          ],
         ),
       ),
     );
