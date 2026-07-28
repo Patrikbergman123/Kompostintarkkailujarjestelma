@@ -139,33 +139,36 @@ class _MyHomePageState extends State<MyHomePage> {
             const SizedBox(height: 25),
 
             Expanded(
-              child: Wrap(
-                spacing: 20,
-                runSpacing: 20,
-                alignment: WrapAlignment.center,
-                children: [
-                  GaugeCard(
-                    title: "Lämpötila",
-                    value: temperature,
-                    unit: "°C",
-                    icon: Icons.thermostat,
-                    gaugeColor: Colors.red,
-                  ),
-                  GaugeCard(
-                    title: "Kosteus",
-                    value: humidity,
-                    unit: "%",
-                    icon: Icons.water_drop,
-                    gaugeColor: Colors.blue,
-                  ),
-                  GaugeCard(
-                    title: "Kompostoituminen",
-                    value: compost,
-                    unit: "%",
-                    icon: Icons.eco,
-                    gaugeColor: getCompostColor(),
-                  ),
-                ],
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: Wrap(
+                  spacing: 20,
+                  runSpacing: 20,
+                  alignment: WrapAlignment.center,
+                  children: [
+                    GaugeCard(
+                      title: "Lämpötila",
+                      value: temperature,
+                      unit: "°C",
+                      icon: Icons.thermostat,
+                      gaugeColor: Colors.red,
+                    ),
+                    GaugeCard(
+                      title: "Kosteus",
+                      value: humidity,
+                      unit: "%",
+                      icon: Icons.water_drop,
+                      gaugeColor: Colors.blue,
+                    ),
+                    GaugeCard(
+                      title: "Kompostoituminen",
+                      value: compost,
+                      unit: "%",
+                      icon: Icons.eco,
+                      gaugeColor: getCompostColor(),
+                    ),
+                  ],
+                ),  
               ),
             ),
 

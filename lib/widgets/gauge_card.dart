@@ -39,7 +39,6 @@ class GaugeCard extends StatelessWidget {
 
               const Spacer(),
 
-              // Tähän tulee myöhemmin varsinainen mittari
               Container(
                 height: 120,
                 width: 120,
@@ -62,7 +61,7 @@ class GaugeCard extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-            ]
+            ] // Children
           )
         )
       )
