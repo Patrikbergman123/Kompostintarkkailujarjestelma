@@ -69,7 +69,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> loadSensorData() async {
     try {
       final response = await http.get(
-        Uri.parse("http://$arduinoIp/data"),
+        Uri.parse("http://$arduinoIp/data"), // Tähän ei tarvitse koskea!
       );
 
       if (response.statusCode == 200) {
@@ -117,6 +117,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.green[0],
       appBar: AppBar(
         title: const Text("Kompostintarkkailujärjestelmä"),
         centerTitle: true,
