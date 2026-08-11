@@ -20,9 +20,6 @@ class MyApp extends StatelessWidget {
       title: 'Kompostintarkkailujärjestelmä',
       theme: ThemeData(
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.green,
-        ),
       ),
       home: const MyHomePage(),
     );
@@ -38,7 +35,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   /// Vaihda tähän Arduinon IP-osoite
-  static const String arduinoIp = "192.168.1.50";
+  static const String arduinoIp = "-";
 
   double temperature = 0;
   double humidity = 0;
@@ -65,7 +62,7 @@ class _MyHomePageState extends State<MyHomePage> {
     timer?.cancel();
     super.dispose();
   }
-
+/// Lataa anturidata Arduinolta ja päivittää tilan.
   Future<void> loadSensorData() async {
     try {
       final response = await http.get(
@@ -89,7 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
       });
     }
   }
-
+/// Palauttaa kompostin tilan värin lämpötilan ja kosteuden perusteella.
   Color getCompostColor() {
     if (temperature < 30) {
       return Colors.red;
@@ -117,81 +114,92 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.green[0],
       appBar: AppBar(
+        backgroundColor: Colors.green,
         title: const Text("Kompostintarkkailujärjestelmä"),
         centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            Text(
-              connected
-                  ? "Yhteys Arduinoon muodostettu"
-                  : "Ei yhteyttä Arduinoon",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: connected ? Colors.green : Colors.red,
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage("assets/tausta.png"),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            children: [
+              Text(
+                connected
+                    ? "Yhteys Arduinoon muodostettu"
+                    : "Ei yhteyttä Arduinoon",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: connected ? Colors.green : Colors.red,
+                ),
               ),
-            ),
 
-            const SizedBox(height: 25),
+              const SizedBox(height: 25),
 
-            Expanded(
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: Wrap(
-                  spacing: 20,
-                  runSpacing: 20,
-                  alignment: WrapAlignment.center,
-                  children: [
-                    GaugeCard(
-                      title: "Lämpötila",
-                      value: temperature,
-                      unit: "°C",
-                      icon: Icons.thermostat,
-                      gaugeColor: Colors.red,
-                    ),
-                    GaugeCard(
-                      title: "Kosteus",
-                      value: humidity,
-                      unit: "%",
-                      icon: Icons.water_drop,
-                      gaugeColor: Colors.blue,
-                    ),
-                    GaugeCard(
-                      title: "Kompostoituminen",
-                      value: compost,
-                      unit: "%",
-                      icon: Icons.eco,
-                      gaugeColor: getCompostColor(),
-                    ),
-                  ],
-                ),  
+              Expanded(
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: Wrap(
+                    spacing: 20,
+                    runSpacing: 20,
+                    alignment: WrapAlignment.center,
+                    children: [
+                      GaugeCard(
+                        title: "Lämpötila",
+                        value: temperature,
+                        unit: "°C",
+                        icon: Icons.thermostat,
+                        gaugeColor: Colors.red,
+                      ),
+                      GaugeCard(
+                        title: "Kosteus",
+                        value: humidity,
+                        unit: "%",
+                        icon: Icons.water_drop,
+                        gaugeColor: Colors.blue,
+                      ),
+                      GaugeCard(
+                        title: "Kompostoituminen",
+                        value: compost,
+                        unit: "%",
+                        icon: Icons.eco,
+                        gaugeColor: getCompostColor(),
+                      ),
+                    ],
+                  ),  
+                ),
               ),
-            ),
 
-            const SizedBox(height: 20),
+              const SizedBox(height: 20),
 
-            Text(
-              getCompostStatus(),
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: getCompostColor(),
+              Text(
+                getCompostStatus(),
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: getCompostColor(),
+                ),
               ),
-            ),
 
-            const SizedBox(height: 20),
+              const SizedBox(height: 20),
 
-            ElevatedButton.icon(
-              onPressed: loadSensorData,
-              icon: const Icon(Icons.refresh),
-              label: const Text("Päivitä mittaukset"),
-            ),
-          ],
+              ElevatedButton.icon(
+                onPressed: loadSensorData,
+                icon: const Icon(Icons.refresh),
+                label: const Text("Päivitä mittaukset"),
+              ),
+            ],
+          ),
         ),
       ),
     );
