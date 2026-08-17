@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -62,11 +63,12 @@ class _MyHomePageState extends State<MyHomePage> {
     timer?.cancel();
     super.dispose();
   }
-/// Lataa anturidata Arduinolta ja päivittää tilan.
+
+  /// Lataa anturidata Arduinolta ja päivittää tilan.
   Future<void> loadSensorData() async {
     try {
       final response = await http.get(
-        Uri.parse("http://$arduinoIp/data"), // Tähän ei tarvitse koskea!
+        Uri.parse("http://$arduinoIp/data"),
       );
 
       if (response.statusCode == 200) {
@@ -86,7 +88,8 @@ class _MyHomePageState extends State<MyHomePage> {
       });
     }
   }
-/// Palauttaa kompostin tilan värin lämpötilan ja kosteuden perusteella.
+
+  /// Palauttaa kompostin tilan värin lämpötilan ja kosteuden perusteella.
   Color getCompostColor() {
     if (temperature < 30) {
       return Colors.red;
@@ -114,95 +117,288 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.green,
-        title: const Text("Kompostintarkkailujärjestelmä"),
-        centerTitle: true,
-      ),
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
+      extendBodyBehindAppBar: true,
+      backgroundColor: Colors.black,
 
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage("assets/tausta.png"),
-            fit: BoxFit.cover,
+      // ─────────────────────────────────────────────
+      // APPBAR
+      // ─────────────────────────────────────────────
+
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(68),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.vertical(
+            bottom: Radius.circular(22),
           ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            children: [
-              Text(
-                connected
-                    ? "Yhteys Arduinoon muodostettu"
-                    : "Ei yhteyttä Arduinoon",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: connected ? Colors.green : Colors.red,
+          child: BackdropFilter(
+            filter: ImageFilter.blur(
+              sigmaX: 12,
+              sigmaY: 12,
+            ),
+            child: Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFF245B2A).withValues(alpha: 0.72),
+                borderRadius: const BorderRadius.vertical(
+                  bottom: Radius.circular(22),
+                ),
+                border: Border(
+                  bottom: BorderSide(
+                    color: Colors.white.withValues(alpha: 0.12),
+                    width: 1,
+                  ),
                 ),
               ),
+              child: AppBar(
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                scrolledUnderElevation: 0,
+                centerTitle: true,
 
-              const SizedBox(height: 25),
-
-              Expanded(
-                child: Align(
-                  alignment: Alignment.topCenter,
-                  child: Wrap(
-                    spacing: 20,
-                    runSpacing: 20,
-                    alignment: WrapAlignment.center,
-                    children: [
-                      GaugeCard(
-                        title: "Lämpötila",
-                        value: temperature,
-                        unit: "°C",
-                        icon: Icons.thermostat,
-                        gaugeColor: Colors.red,
-                      ),
-                      GaugeCard(
-                        title: "Kosteus",
-                        value: humidity,
-                        unit: "%",
-                        icon: Icons.water_drop,
-                        gaugeColor: Colors.blue,
-                      ),
-                      GaugeCard(
-                        title: "Kompostoituminen",
-                        value: compost,
-                        unit: "%",
-                        icon: Icons.eco,
-                        gaugeColor: getCompostColor(),
-                      ),
-                    ],
-                  ),  
+                title: const Text(
+                  "Kompostintarkkailujärjestelmä",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.2,
+                  ),
                 ),
               ),
-
-              const SizedBox(height: 20),
-
-              Text(
-                getCompostStatus(),
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: getCompostColor(),
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              ElevatedButton.icon(
-                onPressed: loadSensorData,
-                icon: const Icon(Icons.refresh),
-                label: const Text("Päivitä mittaukset"),
-              ),
-            ],
+            ),
           ),
         ),
       ),
-      
+
+      // ─────────────────────────────────────────────
+      // PÄÄSISÄLTÖ
+      // ─────────────────────────────────────────────
+
+      body: Stack(
+        children: [
+
+          // TAUSTAKUVA
+          Positioned.fill(
+            child: Image.asset(
+              "assets/tausta2.jpg",
+              fit: BoxFit.cover,
+              alignment: Alignment.center,
+              filterQuality: FilterQuality.high,
+            ),
+          ),
+
+          // Kevyt tumma kerros taustakuvan päällä.
+          // Tämä EI vaikuta GaugeCardien väreihin.
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withValues(alpha: 0.18),
+                    Colors.black.withValues(alpha: 0.08),
+                    Colors.black.withValues(alpha: 0.22),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // SISÄLTÖ
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(
+                20,
+                78,
+                20,
+                20,
+              ),
+              child: Column(
+                children: [
+
+                  // ─────────────────────────────
+                  // YHTEYSTILA
+                  // ─────────────────────────────
+
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 7,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.45),
+                      borderRadius: BorderRadius.circular(30),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.16),
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+
+                        Container(
+                          width: 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: connected
+                                ? Colors.greenAccent
+                                : Colors.redAccent,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: connected
+                                    ? Colors.greenAccent
+                                    : Colors.redAccent,
+                                blurRadius: 6,
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(width: 8),
+
+                        Text(
+                          connected
+                              ? "Yhteys Arduinoon muodostettu"
+                              : "Ei yhteyttä Arduinoon",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // ─────────────────────────────
+                  // GAUGE CARDIT
+                  // ─────────────────────────────
+
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.topCenter,
+                      child: Wrap(
+                        spacing: 20,
+                        runSpacing: 20,
+                        alignment: WrapAlignment.center,
+                        children: [
+
+                          // GaugeCardia ei muutettu
+                          GaugeCard(
+                            title: "Lämpötila",
+                            value: temperature,
+                            unit: "°C",
+                            icon: Icons.thermostat,
+                            gaugeColor: Colors.red,
+                          ),
+
+                          // GaugeCardia ei muutettu
+                          GaugeCard(
+                            title: "Kosteus",
+                            value: humidity,
+                            unit: "%",
+                            icon: Icons.water_drop,
+                            gaugeColor: Colors.blue,
+                          ),
+
+                          // GaugeCardia ei muutettu
+                          GaugeCard(
+                            title: "Kompostoituminen",
+                            value: compost,
+                            unit: "%",
+                            icon: Icons.eco,
+                            gaugeColor: getCompostColor(),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // ─────────────────────────────
+                  // KOMPOSTIN TILA
+                  // ─────────────────────────────
+
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 9,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.48),
+                      borderRadius: BorderRadius.circular(30),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.14),
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+
+                        Icon(
+                          Icons.eco_rounded,
+                          size: 18,
+                          color: getCompostColor(),
+                        ),
+
+                        const SizedBox(width: 8),
+
+                        Text(
+                          getCompostStatus(),
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: getCompostColor(),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // ─────────────────────────────
+                  // PÄIVITÄ-NAPPI
+                  // ─────────────────────────────
+
+                  ElevatedButton.icon(
+                    onPressed: loadSensorData,
+                    icon: const Icon(
+                      Icons.refresh_rounded,
+                      size: 17,
+                    ),
+                    label: const Text(
+                      "Päivitä mittaukset",
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:
+                          const Color(0xFF2E7D32).withValues(alpha: 0.92),
+                      foregroundColor: Colors.white,
+                      elevation: 5,
+                      shadowColor: Colors.black.withValues(alpha: 0.35),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 19,
+                        vertical: 10,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
