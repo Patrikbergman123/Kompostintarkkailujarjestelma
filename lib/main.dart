@@ -120,9 +120,9 @@ class _MyHomePageState extends State<MyHomePage> {
       extendBodyBehindAppBar: true,
       backgroundColor: Colors.black,
 
-      // ─────────────────────────────────────────────
-      // APPBAR
-      // ─────────────────────────────────────────────
+      
+      // Yläpalkki
+    
 
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(68),
@@ -158,7 +158,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   "Kompostintarkkailujärjestelmä",
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 20,
+                    fontSize: 25,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0.2,
                   ),
@@ -169,14 +169,11 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
 
-      // ─────────────────────────────────────────────
-      // PÄÄSISÄLTÖ
-      // ─────────────────────────────────────────────
 
       body: Stack(
         children: [
 
-          // TAUSTAKUVA
+          // Taustakuva
           Positioned.fill(
             child: Image.asset(
               "assets/tausta2.jpg",
@@ -187,7 +184,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
 
           // Kevyt tumma kerros taustakuvan päällä.
-          // Tämä EI vaikuta GaugeCardien väreihin.
+        
           Positioned.fill(
             child: Container(
               decoration: BoxDecoration(
@@ -216,9 +213,9 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Column(
                 children: [
 
-                  // ─────────────────────────────
-                  // YHTEYSTILA
-                  // ─────────────────────────────
+                  
+                  // Yhteystila Arduinon kanssa
+                  
 
                   Container(
                     padding: const EdgeInsets.symmetric(
@@ -274,9 +271,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
                   const SizedBox(height: 20),
 
-                  // ─────────────────────────────
+                  
                   // GAUGE CARDIT
-                  // ─────────────────────────────
+                  
 
                   Expanded(
                     child: Align(
@@ -318,9 +315,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ),
 
-                  // ─────────────────────────────
                   // KOMPOSTIN TILA
-                  // ─────────────────────────────
+                  
 
                   Container(
                     padding: const EdgeInsets.symmetric(
@@ -361,9 +357,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
                   const SizedBox(height: 12),
 
-                  // ─────────────────────────────
-                  // PÄIVITÄ-NAPPI
-                  // ─────────────────────────────
+                  
+                  // Päivitä nappi sivun alareunassa
+                  
 
                   ElevatedButton.icon(
                     onPressed: loadSensorData,
