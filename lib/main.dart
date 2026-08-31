@@ -272,7 +272,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   const SizedBox(height: 20),
 
                   
-                  // GAUGE CARDIT
+                  // Mittarit
                   
 
                   Expanded(
